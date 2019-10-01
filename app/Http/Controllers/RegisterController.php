@@ -10,27 +10,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
 
-class UserController extends Controller
+class RegisterController extends Controller
 {
-    public function login(Request $request){
-        $data  = $request->all();
-
-        $validator = Validator::make($data, [
-            'email' => ['required', 'string', 'email', 'max:255'],
-            'password' => ['required', 'string'],
-        ]);
-
-        if ($validator->fails()){
-            return $validator->errors();
-        }
-
-        if (Auth::attempt(["email"=>$data['email'], "password"=>$data['password']])){
-            $user = auth()->user();
-            $user->token = $user->createToken($user->email)->accessToken;
-            return $user;
-        }
-        return ["status" => false];
-    }
 
     public function register(Request $request){
         $data = $request->all();
@@ -39,6 +20,11 @@ class UserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
+        ],[
+            'name.required' => 'O nome é obrigatório',
+            'email.required' => 'O email é obrigatório',
+            'email.email' => 'O email não é valido',
+            'password.required' => 'A senha é obrigatória'
         ]);
 
         if ($validator->fails()){

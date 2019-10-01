@@ -22,5 +22,16 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 // Router::post('/login', 'UserController@login');
-Route::post('/register', "UserController@register");
-Route::post('/login', "UserController@login");
+
+Route::post('/login', "LoginController@login")->name('login');
+
+
+Route::middleware('auth:api')->group(function(){
+
+    Route::prefix('/roles')->group(function(){
+        Route::get('/auth-roles', "RolesController@getAuthRoles");
+        Route::get('/all-roles', "RolesController@getAllRoles");
+    });
+
+    Route::post('/register', "RegisterController@register")->name('register');
+});
