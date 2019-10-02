@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use App\Role;
 use App\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
@@ -36,8 +37,10 @@ class RegisterController extends Controller
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password'])
-        ]);
 
+        ]);
+        $role = Role::where('name', $data['role'])->first();
+        $user->roles()->attach($role);
         $user->token = $user->createToken($user->email)->accessToken;
         return $user;
     }
