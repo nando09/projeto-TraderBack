@@ -32,6 +32,18 @@ Route::middleware('auth:api')->group(function(){
         Route::get('/auth-roles', "RolesController@getAuthRoles");
         Route::get('/all-roles', "RolesController@getAllRoles");
     });
+    Route::post('/course/create', 'CoursesController@createCourse');
+    Route::resource('/course', 'CoursesController')->except(['create', 'index', 'store', 'show', 'edit']);
+    Route::prefix('/courses')->group(function(){
+
+        Route::get('/all-courses', "CoursesController@getAllCourses");
+
+        Route::prefix('/{course_id}')->group(function(){
+            Route::get('/modules', 'CoursesController@getCourseModules');
+            Route::get('/module/{module_id}/', 'CoursesController@getModuleLessons');
+        });
+
+    });
 
     Route::post('/register', "RegisterController@register")->name('register');
 });
