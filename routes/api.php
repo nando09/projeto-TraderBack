@@ -32,8 +32,29 @@ Route::middleware('auth:api')->group(function(){
         Route::get('/auth-roles', "RolesController@getAuthRoles");
         Route::get('/all-roles', "RolesController@getAllRoles");
     });
-    Route::post('/course/create', 'CoursesController@createCourse');
-    Route::resource('/course', 'CoursesController')->except(['create', 'index', 'store', 'show', 'edit']);
+
+//Rotas de organização de curso
+    Route::prefix('/course')->group(function(){
+        Route::post('/create', 'CoursesController@createCourse');
+//        Route::post('/update', 'CoursesController@updateCourse');
+//        Route::post('/destroy', 'CoursesController@destroyCourse');
+    });
+
+    Route::prefix('/module')->group(function(){
+        Route::post('/create', 'CoursesController@createModule');
+//        Route::post('/update', 'CoursesController@updateModule');
+//        Route::post('/destroy', 'CoursesController@destroyModule');
+
+    });
+
+    Route::prefix('/lesson')->group(function(){
+        Route::post('/create', 'CoursesController@createLesson');
+//        Route::post('/update', 'CoursesController@updateModule');
+//        Route::post('/destroy', 'CoursesController@destroyModule');
+
+    });
+
+//    Rotas de Listagem de cursos
     Route::prefix('/courses')->group(function(){
 
         Route::get('/all-courses', "CoursesController@getAllCourses");

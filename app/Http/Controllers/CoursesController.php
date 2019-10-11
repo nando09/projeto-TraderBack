@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Course;
 use App\Module;
+use App\Lesson;
 
 class CoursesController extends Controller
 {
@@ -35,6 +36,64 @@ class CoursesController extends Controller
         ]);
 
         return $course;
+    }
+
+    public function createModule(Request $request)
+    {
+
+        $data = $request->all();
+
+        $validator = Validator::make($data, [
+            'name' => ['required', 'string', 'max:255']
+        ],[
+            'name.required' => 'O nome é obrigatório',
+        ]);
+
+        if($validator->fails()){
+            return $validator->errors();
+        }
+
+        $course = Course::where('id', $data['course_id'])->first();
+
+        $module = Module::create([
+            'name' => $data['name'],
+            'course_id' => $data['course_id'],
+            'descricao' => $data['descricao'],
+            'status' => $data['status'],
+        ]);
+        $module->course()->associate($course);
+
+        return $module;
+    }
+
+    public function createLesson(Request $request)
+    {
+
+        $data = $request->all();
+
+        $validator = Validator::make($data, [
+            'name' => ['required', 'string', 'max:255']
+        ],[
+            'name.required' => 'O nome é obrigatório',
+        ]);
+
+        if($validator->fails()){
+            return $validator->errors();
+        }
+
+        $module = Module::where('id', $data['module_id'])->first();
+
+        $lesson = Lesson::create([
+            'name' => $data['name'],
+            'module_id' => $data['module_id'],
+            'video' => $data['video'],
+            'description' => $data['descricao'],
+            'content' => $data['content'],
+            'status' => $data['status'],
+        ]);
+        $lesson->module()->associate($module);
+
+        return $lesson;
     }
 
     /**

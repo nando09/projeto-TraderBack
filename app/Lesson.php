@@ -12,7 +12,7 @@ class Lesson extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'video', 'descricao', 'content', 'status'
+        'name', 'module_id', 'video', 'description', 'content', 'status'
     ];
 
     public function module(){
