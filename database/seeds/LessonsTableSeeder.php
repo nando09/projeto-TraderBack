@@ -13,7 +13,6 @@ class LessonsTableSeeder extends Seeder
      */
     public function run()
     {
-        Lesson::truncate();
 
         Lesson::create([
            'name' => 'aula1',

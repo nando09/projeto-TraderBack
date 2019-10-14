@@ -15,7 +15,9 @@ class CreateModulesTable extends Migration
     {
         Schema::create('modules', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->bigInteger('course_id');
+            $table->bigInteger('course_id')->unsigned();
+            $table->foreign('course_id')->references('id')
+                ->on('courses')->onDelete('cascade');
             $table->string('name');
             $table->text('descricao');
             $table->string('status');

@@ -11,6 +11,8 @@ use App\Lesson;
 class CoursesController extends Controller
 {
 
+//    CREATE FUNCTIONS
+
     public function createCourse(Request $request)
     {
         $data = $request->all();
@@ -96,28 +98,125 @@ class CoursesController extends Controller
         return $lesson;
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+//    UPDATE FUNCTIONS
+
+    public function updateCourse(Request $request, $id)
     {
-        //
+         $data = $request->all();
+         $validator = Validator::make($data, [
+             'name' => ['required', 'string', 'max:255'],
+         ],[
+             'name.required' => 'O nome é obrigatório',
+         ]);
+
+         if($validator->fails()){
+             return $validator->errors();
+         }
+
+         $course = Course::find($id);
+
+         $course->update([
+             'name' => $data['name'],
+             'subtitle' => $data['subtitle'],
+             'AccessLevel' => $data['AccessLevel'],
+             'DataInicio' => $data['DataInicio'],
+             'DataFim' => $data['DataFim'],
+             'status' => $data['status'],
+             'descricao' => $data['descricao'],
+         ]);
+
+         return 'Curso Atualizado';
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
+    public function updateModule(Request $request, $id)
     {
-        //
+        $data = $request->all();
+        $validator = Validator::make($data, [
+            'name' => ['required', 'string', 'max:255'],
+        ],[
+            'name.required' => 'O nome é obrigatório',
+        ]);
+
+        if($validator->fails()){
+            return $validator->errors();
+        }
+
+        $module = Module::find($id);
+
+        $module->update([
+            'name' => $data['name'],
+            'status' => $data['status'],
+            'descricao' => $data['descricao'],
+        ]);
+
+        return 'Modulo Atualizado';
     }
+
+    public function updateLesson(Request $request, $id)
+    {
+        $data = $request->all();
+        $validator = Validator::make($data, [
+            'name' => ['required', 'string', 'max:255'],
+        ],[
+            'name.required' => 'O nome é obrigatório',
+        ]);
+
+        if($validator->fails()){
+            return $validator->errors();
+        }
+
+        $lesson = Lesson::find($id);
+
+        $lesson->update([
+            'name' => $data['name'],
+            'status' => $data['status'],
+            'content' => $data['content'],
+            'video' => $data['video'],
+            'description' => $data['descricao'],
+        ]);
+
+        return 'Aula Atualizada';
+    }
+
+//    DESTROY FUNCTIONS
+
+    public function destroyCourse(Request $request)
+    {
+        $course = Course::find($request['id']);
+        $course->delete();
+        if (Course::find($request['id'])){
+            $status = 'Error!';
+        } else {
+            $status = 'Done!';
+        }
+        return $status;
+    }
+
+    public function destroyModule(Request $request)
+    {
+        $module = Module::find($request['id']);
+        $module->delete();
+        if (Module::find($request['id'])){
+            $status = 'Error!';
+        } else {
+            $status = 'Done!';
+        }
+        return $status;
+    }
+
+    public function destroyLesson(Request $request)
+    {
+        $lesson = Lesson::find($request['id']);
+        $lesson->delete();
+        if (Lesson::find($request['id'])){
+            $status = 'Error!';
+        } else {
+            $status = 'Done!';
+        }
+        return $status;
+    }
+
+//    GET ALL FUNCTIONS
 
     public function getAllCourses(){
         $all_courses = Course::all();

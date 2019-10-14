@@ -13,7 +13,6 @@ class ModulesTableSeeder extends Seeder
      */
     public function run()
     {
-        Module::truncate();
 
         $curso = Course::where('id', '1')->first();
         $modulo1 = Module::create([

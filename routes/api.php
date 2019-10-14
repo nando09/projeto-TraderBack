@@ -36,21 +36,21 @@ Route::middleware('auth:api')->group(function(){
 //Rotas de organização de curso
     Route::prefix('/course')->group(function(){
         Route::post('/create', 'CoursesController@createCourse');
-//        Route::post('/update', 'CoursesController@updateCourse');
-//        Route::post('/destroy', 'CoursesController@destroyCourse');
+        Route::put('/update/{id}', 'CoursesController@updateCourse');
+        Route::post('/destroy', 'CoursesController@destroyCourse');
     });
 
     Route::prefix('/module')->group(function(){
         Route::post('/create', 'CoursesController@createModule');
-//        Route::post('/update', 'CoursesController@updateModule');
-//        Route::post('/destroy', 'CoursesController@destroyModule');
+        Route::put('/update/{id}', 'CoursesController@updateModule');
+        Route::post('/destroy', 'CoursesController@destroyModule');
 
     });
 
     Route::prefix('/lesson')->group(function(){
         Route::post('/create', 'CoursesController@createLesson');
-//        Route::post('/update', 'CoursesController@updateModule');
-//        Route::post('/destroy', 'CoursesController@destroyModule');
+        Route::put('/update/{id}', 'CoursesController@updateLesson');
+        Route::post('/destroy', 'CoursesController@destroyLesson');
 
     });
 
