@@ -6,13 +6,26 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\User;
+use App\Permission;
 use App\Role;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Route;
 
 
 class RolesController extends Controller
 {
+    public function updateRole(Request $request, $id){
+        $data = $request->all();
+        $role = Role::find($id);
+        $role->update([
+            'name' => $data['name'],
+        ]);
+        $role->permissions()->detach();
+        foreach($data['permissions'] as $modal_permission){
+            $permission = Permission::find($modal_permission);
+            $role->permissions()->attach($permission);
+        }
+        return $role;
+    }
     public function getAllRoles(){
         $all_roles = Role::all();
         foreach($all_roles as $key => $role){
@@ -24,6 +37,13 @@ class RolesController extends Controller
 
 
         return $all_roles;
+
+    }
+
+    public function getAllPermissions(){
+
+        $all_permissions = Permission::all();
+        return $all_permissions;
 
     }
 

@@ -14,10 +14,13 @@ class PermissionsTableSeeder extends Seeder
     {
         Permission::truncate();
 
-        Permission::create(['name'=>'Criar']);
-        Permission::create(['name'=>'Editar']);
-        Permission::create(['name'=>'Apagar']);
-        Permission::create(['name'=>'Ver']);
+        Permission::create(['name'=>'Cursos']);
+        Permission::create(['name'=>'Banca']);
+        Permission::create(['name'=>'Permissoes']);
+        Permission::create(['name'=>'Cadastros']);
+        Permission::create(['name'=>'Relatorios']);
+        Permission::create(['name'=>'ClientePago']);
+        Permission::create(['name'=>'ClienteGratis']);
 
     }
 }

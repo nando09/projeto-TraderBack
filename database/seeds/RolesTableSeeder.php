@@ -14,20 +14,36 @@ class RolesTableSeeder extends Seeder
     {
         Role::truncate();
 
-        $createPermission = Permission::where('name', 'Criar')->first();
-        $editPermission = Permission::where('name', 'Editar')->first();
-        $deletePermission = Permission::where('name', 'Apagar')->first();
-        $viewPermission = Permission::where('name', 'Ver')->first();
+        $cursoPermission = Permission::where('name', 'Cursos')->first();
+        $bancaPermission = Permission::where('name', 'Banca')->first();
+        $cadastrosPermission = Permission::where('name', 'Cadastros')->first();
+        $relatoriosPermission = Permission::where('name', 'Relatorios')->first();
+        $Permission = Permission::where('name', 'Permissoes')->first();
+        $clientePermission = Permission::where('name', 'ClientePago')->first();
+//        $clienteGratisPermission = Permission::where('name', 'ClienteGratis')->first();
 
         $dev = Role::create(['name' => 'Dev']);
         $admin = Role::create(['name' => 'Admin']);
         $fin = Role::create(['name' => 'Fin']);
         $client = Role::create(['name' => 'Client']);
 
-        $dev->permissions()->attach($createPermission);
-        $dev->permissions()->attach($editPermission);
-        $admin->permissions()->attach($editPermission);
-        $fin->permissions()->attach($viewPermission);
-        $client->permissions()->attach($viewPermission);
+        $dev->permissions()->attach($cursoPermission);
+        $dev->permissions()->attach($bancaPermission);
+        $dev->permissions()->attach($cadastrosPermission);
+        $dev->permissions()->attach($relatoriosPermission);
+        $dev->permissions()->attach($Permission);
+        $dev->permissions()->attach($clientePermission);
+
+        $admin->permissions()->attach($cursoPermission);
+        $admin->permissions()->attach($bancaPermission);
+        $admin->permissions()->attach($cadastrosPermission);
+        $admin->permissions()->attach($relatoriosPermission);
+        $admin->permissions()->attach($Permission);
+        $admin->permissions()->attach($clientePermission);
+
+        $fin->permissions()->attach($relatoriosPermission);
+        $fin->permissions()->attach($bancaPermission);
+
+        $client->permissions()->attach($clientePermission);
     }
 }

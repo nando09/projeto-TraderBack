@@ -28,9 +28,14 @@ Route::post('/login', "LoginController@login")->name('login');
 
 Route::middleware('auth:api')->group(function(){
 
+//    Rotas de organização de roles
     Route::prefix('/roles')->group(function(){
         Route::get('/auth-roles', "RolesController@getAuthRoles");
         Route::get('/all-roles', "RolesController@getAllRoles");
+        Route::get('/all-permissions', "RolesController@getAllPermissions");
+
+        Route::put('/update/{id}', 'RolesController@updateRole');
+
     });
 
 //Rotas de organização de curso
