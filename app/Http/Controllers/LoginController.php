@@ -24,12 +24,15 @@ class LoginController extends Controller
 
             return $validator->errors();
         }
-        //return 'teste';
+//        return 'teste';
         if (Auth::attempt(["email"=>$data['email'], "password"=>$data['password']])){
-
             $user = Auth::user();
+
             $user->role = $user->roles()->get()->pluck('name');
-            $user->token = $user->createToken($user->email)->accessToken;
+
+            $teste = $user->createToken($user->email)->accessToken;
+            $user->token = $teste;
+
 
             return $user;
         }

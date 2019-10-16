@@ -16,9 +16,13 @@ class RolesController extends Controller
     public function getAllRoles(){
         $all_roles = Role::all();
         foreach($all_roles as $key => $role){
+
             $all_roles[$key]->permissions = $role->permissions()->get()->pluck('name');
             $all_roles[$key]->users = $role->users()->get()->pluck('name');
+
         }
+
+
         return $all_roles;
 
     }
