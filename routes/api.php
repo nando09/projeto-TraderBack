@@ -1,6 +1,10 @@
 <?php
 
 use Illuminate\Http\Request;
+use App\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,4 +19,19 @@ use Illuminate\Http\Request;
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+// Router::post('/login', 'UserController@login');
+
+Route::post('/login', "LoginController@login")->name('login');
+
+
+Route::middleware('auth:api')->group(function(){
+
+    Route::prefix('/roles')->group(function(){
+        Route::get('/auth-roles', "RolesController@getAuthRoles");
+        Route::get('/all-roles', "RolesController@getAllRoles");
+    });
+
+    Route::post('/register', "RegisterController@register")->name('register');
 });
