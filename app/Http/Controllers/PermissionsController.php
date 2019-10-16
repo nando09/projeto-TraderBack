@@ -27,7 +27,7 @@ class PermissionsController extends Controller
 
     public function hasAnyRoles($roles){
 
-        return null !== $this.roles()->whereIn('name', $roles)->first();
+        return null !== roles()->whereIn('name', $roles)->first() . $this;
 
     }
 
