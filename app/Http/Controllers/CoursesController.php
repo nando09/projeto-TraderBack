@@ -72,7 +72,7 @@ class CoursesController extends Controller
     {
 
         $data = $request->all();
-
+//        return $request->all()['files'];
         $validator = Validator::make($data, [
             'name' => ['required', 'string', 'max:255']
         ],[
@@ -95,6 +95,11 @@ class CoursesController extends Controller
         ]);
         $lesson->module()->associate($module);
 
+        if($files = $data['files']){
+            foreach($files as $file){
+                $file->storeAs($lesson->id, $file->getClientOriginalName(), 'public');
+            }
+        }
         return $lesson;
     }
 
