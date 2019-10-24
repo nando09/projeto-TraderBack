@@ -18,4 +18,8 @@ class Lesson extends Model
     public function module(){
         return $this->belongsTo('App\Module');
     }
+
+    public function attachments(){
+        return $this->hasMany('App\Attachments');
+    }
 }
