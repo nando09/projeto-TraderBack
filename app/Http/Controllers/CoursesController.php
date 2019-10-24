@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Course;
 use App\Module;
 use App\Lesson;
+use App\Attachments;
 
 class CoursesController extends Controller
 {
@@ -97,6 +98,11 @@ class CoursesController extends Controller
 
         if($files = $data['files']){
             foreach($files as $file){
+                 $attachment = Attachments::create([
+                    'lesson_id' => $lesson->id,
+                    'filename' => $file->getClientOriginalName()
+                ]);
+                 $attachment->lesson()->associate($lesson);
                 $file->storeAs($lesson->id, $file->getClientOriginalName(), 'public');
             }
         }
@@ -240,7 +246,12 @@ class CoursesController extends Controller
     }
 
     public function getModuleLessons($course_id, $module_id){
+//        return '$module_id';
         $lessons = Module::find($module_id)->lessons;
+
+        foreach($lessons as $key => $lesson){
+            $lessons[$key]->attachments = $lesson->attachments;
+        }
         return $lessons;
 
     }

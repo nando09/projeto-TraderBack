@@ -66,7 +66,7 @@ Route::middleware('auth:api')->group(function(){
 
         Route::prefix('/{course_id}')->group(function(){
             Route::get('/modules', 'CoursesController@getCourseModules');
-            Route::get('/module/{module_id}/', 'CoursesController@getModuleLessons');
+            Route::get('/module/{module_id}', 'CoursesController@getModuleLessons');
         });
 
     });
