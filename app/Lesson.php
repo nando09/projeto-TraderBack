@@ -22,4 +22,8 @@ class Lesson extends Model
     public function attachments(){
         return $this->hasMany('App\Attachments');
     }
+
+    public function comments(){
+        return $this->hasMany('App\Comment');
+    }
 }

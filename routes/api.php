@@ -72,4 +72,5 @@ Route::middleware('auth:api')->group(function(){
     });
 
     Route::post('/register', "RegisterController@register")->name('register');
+    Route::post('/client/register', 'RegisterController@RegisterClient')->name('clientRegister');
 });
