@@ -25,8 +25,10 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::post('/login', "LoginController@login")->name('login');
 
+Route::post('/client/register', 'RegisterController@RegisterClient')->name('clientRegister');
 
 Route::middleware('auth:api')->group(function(){
+
 
 //    Rotas de organização de roles
     Route::prefix('/roles')->group(function(){
@@ -72,5 +74,4 @@ Route::middleware('auth:api')->group(function(){
     });
 
     Route::post('/register', "RegisterController@register")->name('register');
-    Route::post('/client/register', 'RegisterController@RegisterClient')->name('clientRegister');
 });
