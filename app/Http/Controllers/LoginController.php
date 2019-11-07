@@ -21,7 +21,7 @@ class LoginController extends Controller
         ]);
 
         if ($validator->fails()){
-
+            $validator->errors()->add('status', false);
             return $validator->errors();
         }
 

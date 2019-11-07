@@ -31,16 +31,17 @@ class RegisterController extends Controller
         if ($validator->fails()){
             return $validator->errors();
         }
-
+        $role = Role::where('name', $data['role'])->first();
         $user =  User::create([
 
             'name' => $data['name'],
+            'role_id' => $role->id,
             'email' => $data['email'],
             'password' => Hash::make($data['password'])
 
         ]);
-        $role = Role::where('name', $data['role'])->first();
-        $user->roles()->attach($role);
+
+        $user->role()->associate($role);
         $user->token = $user->createToken($user->email)->accessToken;
         return $user;
     }
@@ -60,6 +61,7 @@ class RegisterController extends Controller
         ]);
 
         if ($validator->fails()){
+            $validator->errors()->add('status', false);
             return $validator->errors();
         }
 
@@ -67,11 +69,12 @@ class RegisterController extends Controller
 
             'name' => $data['name'],
             'email' => $data['email'],
+            'role_id' => 4,
             'password' => Hash::make($data['password'])
 
         ]);
         $role = Role::where('name', 'Client')->first();
-        $user->roles()->attach($role);
+        $user->role()->associate($role);
         $user->token = $user->createToken($user->email)->accessToken;
         return $user;
     }
