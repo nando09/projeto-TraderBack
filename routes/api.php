@@ -23,6 +23,10 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 // Router::post('/login', 'UserController@login');
 
+Route::prefix('/betfair')->group(function() {
+    Route::post('/login', 'BetFairController@login');
+});
+
 Route::post('/login', "LoginController@login")->name('login');
 Route::post('/client/register', 'RegisterController@RegisterClient')->name('clientRegister');
 

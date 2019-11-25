@@ -13,7 +13,6 @@ class UsersTableSeeder extends Seeder
      */
     public function run()
     {
-        User::truncate();
 
         $devRole = Role::where('name', 'Dev')->first();
         $adminRole = Role::where('name', 'Admin')->first();
