@@ -23,15 +23,14 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 // Router::post('/login', 'UserController@login');
 
-Route::prefix('/betfair')->group(function() {
-    Route::post('/login', 'BetFairController@login');
-});
-
 Route::post('/login', "LoginController@login")->name('login');
 Route::post('/client/register', 'RegisterController@RegisterClient')->name('clientRegister');
 
 Route::middleware('auth:api')->group(function(){
 
+    Route::prefix('/betfair')->group(function() {
+        Route::post('/login', 'BetFairController@login');
+    });
 //    Rotas de organização de roles
     Route::prefix('/roles')->group(function(){
         Route::get('/auth-roles', "RolesController@getAuthRoles");
