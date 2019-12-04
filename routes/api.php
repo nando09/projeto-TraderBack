@@ -32,6 +32,9 @@ Route::middleware('auth:api')->group(function(){
         Route::post('/login', 'BetFairController@login');
         Route::post('/liveEvents', 'BetFairController@getLiveEvents');
         Route::post('/nextEvents', 'BetFairController@getNextGames');
+
+        Route::get('/tmOdds', 'BetFairController@tomorrowOdds');
+        Route::get('/nextOdds', 'BetFairController@nextOdds');
     });
 //    Rotas de organização de roles
     Route::prefix('/roles')->group(function(){
