@@ -3,12 +3,18 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Ixudra\Curl\Facades\Curl;
+use PeterColes\Betfair\Betfair;
+use \DateTime;
 
 class BetFairController extends Controller
 {
     public function login(Request $request){
         $data = $request->all();
+
+        $token = Betfair::auth()->login('BOW5JF3VnYo4rqkt', $data['username'], $data['password']);
+        Cache::put('betfairToken', $token, \PeterColes\Betfair\Api\Auth::SESSION_LENGTH);
 
         $res = Curl::to("https://identitysso.betfair.com/api/login")
         ->withHeaders(['Accept'=>'application/json', 'X-Application' => 'BOW5JF3VnYo4rqkt', 'Content-Type' => 'application/x-www-form-urlencoded'])
@@ -22,6 +28,8 @@ class BetFairController extends Controller
 
     public function getLiveEvents(Request $request){
         $data = $request->all();
+
+
         $filter = array(
             "filter" => array(
                 "eventTypeIds"=>[1],
@@ -29,22 +37,12 @@ class BetFairController extends Controller
                 )
             );
             try {
-                $res = Curl::to($this->eventsURL()."listEvents/")
-                ->withHeaders([
-                    'Accept'=>'application/json',
-                'X-Application' => 'BOW5JF3VnYo4rqkt',
-                'X-Authentication' => strval($data['token']),
-                'Content-Type' => 'application/json'
-                ])
-            ->withData(
-                $filter
-                )
-                ->asJsonRequest()
-                ->post();
+                Betfair::auth()->persist('BOW5JF3VnYo4rqkt', $data['token']);
+                $res = Betfair::betting('listEvents', $filter);
             } catch (Exception $e){
                 return $e;
             }
-        $res = json_decode($res);
+//        $res = json_decode($res);
         foreach($res as $key => $game){
             $res2 = Curl::to('https://ips.betfair.com/inplayservice/v1/eventTimelines?_ak=nzIFcwyWhrlwYMrh&alt=json&eventIds='.$game->event->id.'&locale=pt')->get();
             $res[$key]->info = json_decode($res2);
@@ -55,14 +53,11 @@ class BetFairController extends Controller
     }
 
     public function getNextGames(Request $request){
-        date_default_timezone_set('UTC');
+//        date_default_timezone_set('UTC');
+
         $data = $request->all();
-        $fromDate = date("Y-m-d");
-        $fromTime = date("H:i");
-        $from = strval($fromDate)."T".strval($fromTime).":00Z";
-        $toDate = date("Y-m-d", mktime(23,59,59,date("n"),date("j"),date("Y")));
-        $toTime = date("H:i", mktime(23,59,59,date("n"),date("j"),date("Y")));
-        $to = strval($toDate)."T".strval($toTime).":00Z";
+        $from = new DateTime('now + 2 hour');
+        $to = new DateTime('now');
         // return $from;
         // return date('Y-m-dTh:i:sZ', mktime(23,59,59));
         $filter = array(
@@ -70,73 +65,110 @@ class BetFairController extends Controller
                 "eventTypeIds"=>[1],
                 "locale"=>"Portuguese",
                 "marketStartTime"=>array(
-                    "from"=>$from,
-                    "to"=>$to
+                    "from"=>$from->setTimeZone(new \DateTimeZone('America/Sao_Paulo'))->format("Y-m-d\TH:i:s").'Z',
+                    "to"=>$to->setTime(23, 45)->setTimeZone(new \DateTimeZone('America/Sao_Paulo'))->format("Y-m-d\TH:i:s").'Z'
                     )
                 ),
-                "maxResults"=>20
             // "marketProjection"=>[ "EVENT"]
         );
         try {
-            $res = Curl::to($this->eventsURL().'listEvents/')
-            ->withHeaders([
-                'Accept'=>'application/json',
-                'X-Application' => 'BOW5JF3VnYo4rqkt',
-                'X-Authentication' => strval($data['token']),
-                'Content-Type' => 'application/json'
-                ])
-            ->withData(
-                $filter
-                )
-                ->asJsonRequest()
-                ->post();
+            Betfair::auth()->persist('BOW5JF3VnYo4rqkt', $data['token']);
+            $res = Betfair::betting('listEvents', $filter);
 
             } catch (Exception $e){
                 return $e;
             }
-            $res = json_decode($res);
             $res = array_reverse($res);
             return (array) $res;
         }
 
-        public function iSportsURL($path){
-            return "http://api.isportsapi.com/sport/football/".$path;
-        }
-
-        public function getByDate($date){
+        public function getByDate($date, $token){
             try{
-                $res = Curl::to($this->iSportsURL('schedule'))
-                ->withData(array(
-                    "api_key" => "tuVBp52oWMB77Qlb",
-                    "date" => $date
-                ))->asJsonRequest()->get();
-                $res2 = Curl::to($this->iSportsURL('betfair'))
-                ->withData(array(
-                    "api_key" => "tuVBp52oWMB77Qlb"
-                ))
-                ->asJsonRequest()->get();
+
+                $filter = array(
+                    "filter" => array(
+                        "eventTypeIds"=>[1],
+                        "locale"=>"Portuguese",
+                        "marketStartTime"=>array(
+                            "from"=>$date->setTime(0, 0)->setTimeZone(new \DateTimeZone('GMT'))->format("Y-m-d\TH:i:s").'Z',
+                            "to"=>$date->setTime(23, 45)->setTimeZone(new \DateTimeZone('GMT'))->format("Y-m-d\TH:i:s").'Z',
+                        )
+                    ),
+                    "maxResults"=>20
+                    // "marketProjection"=>[ "EVENT"]
+                );
+                Betfair::auth()->persist('BOW5JF3VnYo4rqkt', $token);
+                $res = Betfair::betting('listEvents', $filter);
+                usort($res , function ($a, $b){
+                    if(strtotime($a->event->openDate) > strtotime($b->event->openDate)){
+                        return 1;
+                    }
+                    if(strtotime($a->event->openDate) < strtotime($b->event->openDate)){
+                        return -1;
+                    }
+                    else {
+                        return 0;
+                    }
+                });
+                $gameIds = [];
+
+                foreach($res as $event){
+                    array_push($gameIds, $event->event->id);
+                }
+                $filter2 = [
+                    "filter"=>[
+                        "eventTypeIds"=>[1],
+                        "locale"=>"Portuguese",
+                        "eventIds"=>$gameIds,
+                    ],
+                    "maxResults"=>30,
+                    "marketProjection"=>["EVENT"]
+                ];
+                $res2 = Betfair::betting('listMarketCatalogue', $filter2);
+
+                $marketIds = [];
+                foreach($res2 as $key => $market){
+                    array_push($marketIds, $market->marketId);
+                    $filter3 = [
+                        "marketIds"=>[$market->marketId],
+                        "priceProjection"=>[
+                            "priceData"=>["EX_BEST_OFFERS"]
+                        ]
+                    ];
+                    $odd = Betfair::betting('listMarketBook', $filter3);
+                    $res2[$key]->odds = $odd;
+                }
+
+                foreach($res as $key => $event){
+                    $arr = [];
+                    foreach($res2 as $key2 => $market){
+                        array_push($arr, $market);
+                    }
+                    $res[$key]->market = $arr;
+                }
+
+                return $res;
             } catch(Exception $e) {
                 return $e;
             }
-            $res = json_decode($res);
-            $res2 = json_decode($res2);
-            foreach($res->data as $key => $game){
-                $search =array_search($game->matchId, array_column($res2->data, 'matchId'));
-                $res->data[$key]->odds = $res2->data[$search];
-            }
-            $res = json_encode($res);
-            return $res;
-        }
-        public function tomorrowOdds(){
-            // https://ero.betfair.com/www/sports/exchange/readonly/v1/bymarket?_ak=nzIFcwyWhrlwYMrh&alt=json&currencyCode=BRL&locale=pt&marketIds=1.165890887&rollupLimit=10&types=MARKET_STATE,RUNNER_STATE,RUNNER_EXCHANGE_PRICES_BEST,RUNNER_SP
-            $tomorrow = new \DateTime('tomorrow');
-            return $this->getByDate($tomorrow->format('Y-m-d'));
         }
 
-        public function nextOdds(){
-            $today = date('Y-m-d');
-            $date = date('Y-m-d', strtotime($today. '+ 2 days'));
-            return $this->getByDate($date);
+        public function tomorrowOdds(Request $request){
+            $data = $request->all();
+            $tomorrow = new \DateTime('tomorrow', new \DateTimeZone('America/Sao_Paulo'));
+            return $this->getByDate($tomorrow, $data['token']);
+        }
+
+        public function nextOdds(Request $request){
+            $data = $request->all();
+            $day = new \DateTime('today + 2 days', new \DateTimeZone('America/Sao_Paulo'));
+            return $this->getByDate($day, $data['token']);
+        }
+
+        public function todayOdds(Request $request){
+            $data = $request->all();
+            $today = new \DateTime('today', new \DateTimeZone('America/Sao_Paulo'));
+            return $this->getByDate($today, $data['token']);
         }
 
 }
