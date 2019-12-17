@@ -111,40 +111,53 @@ class BetFairController extends Controller
                     }
                 });
                 $gameIds = [];
-
                 foreach($res as $event){
                     array_push($gameIds, $event->event->id);
                 }
                 $filter2 = [
                     "filter"=>[
+                        "marketTypeCodes"=>["FIRST_HALF_GOALS_05","FIRST_HALF_GOALS_15","FIRST_HALF_GOALS_25","OVER_UNDER_15","OVER_UNDER_25","OVER_UNDER_35","MATCH_ODDS"],
                         "eventTypeIds"=>[1],
                         "locale"=>"Portuguese",
                         "eventIds"=>$gameIds,
                     ],
-                    "maxResults"=>30,
+                    "maxResults"=>1000,
                     "marketProjection"=>["EVENT"]
                 ];
                 $res2 = Betfair::betting('listMarketCatalogue', $filter2);
-
-                $marketIds = [];
+                $contador = 0;
+                $tempMarkets = [];
                 foreach($res2 as $key => $market){
-                    array_push($marketIds, $market->marketId);
-                    $filter3 = [
-                        "marketIds"=>[$market->marketId],
-                        "priceProjection"=>[
-                            "priceData"=>["EX_BEST_OFFERS"]
-                        ]
-                    ];
-                    $odd = Betfair::betting('listMarketBook', $filter3);
-                    $res2[$key]->odds = $odd;
-                }
+                    array_push($tempMarkets, $market->marketId);
+                    if(count($tempMarkets) == 5){
+                        $filter3 = [
+                            "marketIds"=>$tempMarkets,
+                            "priceProjection"=>[
+                                "priceData"=>["EX_BEST_OFFERS"]
+                            ]
+                        ];
+                        $odd = Betfair::betting('listMarketBook', $filter3);
+                        foreach( $odd as $tempOdd){
+                            foreach( $res2 as $keyRes => $tempMarket){
+                                if($tempOdd->marketId == $tempMarket->marketId){
+                                    $res2[$keyRes]->odds = $tempOdd;
+                                }
+                            }
+                        }
+                        $tempMarkets = [];
+                    }
 
+                }
                 foreach($res as $key => $event){
                     $arr = [];
-                    foreach($res2 as $key2 => $market){
-                        array_push($arr, $market);
+                    foreach($res2 as $market){
+                        if($event->event->id == $market->event->id){
+                            array_push($arr, $market);
+                        }
                     }
                     $res[$key]->market = $arr;
+
+                    // $res[$key]->market = array_chunk($res2, 7)[$key];
                 }
 
                 return $res;
