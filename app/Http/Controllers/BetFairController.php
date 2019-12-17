@@ -116,7 +116,7 @@ class BetFairController extends Controller
                 }
                 $filter2 = [
                     "filter"=>[
-                        "marketTypeCodes"=>["FIRST_HALF_GOALS_05","FIRST_HALF_GOALS_15","FIRST_HALF_GOALS_25","OVER_UNDER_15","OVER_UNDER_25","OVER_UNDER_35","MATCH_ODDS"],
+                        "marketTypeCodes"=>["BOTH_TEAMS_TO_SCORE", "FIRST_HALF_GOALS_05","FIRST_HALF_GOALS_15","FIRST_HALF_GOALS_25","OVER_UNDER_05","OVER_UNDER_15","OVER_UNDER_25","OVER_UNDER_35","MATCH_ODDS"],
                         "eventTypeIds"=>[1],
                         "locale"=>"Portuguese",
                         "eventIds"=>$gameIds,
@@ -129,7 +129,7 @@ class BetFairController extends Controller
                 $tempMarkets = [];
                 foreach($res2 as $key => $market){
                     array_push($tempMarkets, $market->marketId);
-                    if(count($tempMarkets) == 5){
+                    if(count($tempMarkets) == 4){
                         $filter3 = [
                             "marketIds"=>$tempMarkets,
                             "priceProjection"=>[
