@@ -12,7 +12,7 @@ class Course extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'subtitle', 'AccessLevel', 'DataInicio', 'DataFim', 'status', 'descricao'
+        'name', 'subtitle', 'AccessLevel', 'DataInicio', 'DataFim', 'descricao', 'ativo'
     ];
 
     public function modules(){

@@ -14,6 +14,24 @@ class CoursesController extends Controller
 
 //    CREATE FUNCTIONS
 
+    public function clientCourse(){
+        $course = Course::where('ativo', 1)->first();
+
+        $modules = $course->modules;
+        foreach($modules as $module){
+            $module->lessons;
+        }
+        return $course;
+    }
+
+    public function activateCourse(Request $request){
+        $data = $request->all();
+        Course::where('ativo', 1)->update(['ativo' => false]);
+        Course::findOrFail($data['course'])->update(['ativo' => true]);
+        $course = Course::findOrFail($data['course']);
+        return $course;
+    }
+
     public function createCourse(Request $request)
     {
         $data = $request->all();
@@ -27,15 +45,17 @@ class CoursesController extends Controller
         if($validator->fails()){
             return $validator->errors();
         }
-
+        if($data['status'] == true){
+        Course::where('ativo', 1)->update(['ativo' => false]);
+        }
         $course = Course::create([
             'name' => $data['name'],
             'subtitle' => $data['subtitle'],
             'AccessLevel' => $data['AccessLevel'],
             'DataInicio' => $data['DataInicio'],
             'DataFim' => $data['DataFim'],
-            'status' => $data['status'],
             'descricao' => $data['descricao'],
+            'ativo' => $data['status']
         ]);
 
         return $course;
@@ -253,6 +273,17 @@ class CoursesController extends Controller
             $lessons[$key]->attachments = $lesson->attachments;
         }
         return $lessons;
+    }
 
+    public function getModule($module){
+        $module = Module::findOrFail($module);
+        $module->lessons;
+        return $module;
+    }
+
+    public function getLesson($lesson_id){
+        $lesson =  Lesson::findOrFail($lesson_id);
+        $lesson->comments;
+        return $lesson;
     }
 }

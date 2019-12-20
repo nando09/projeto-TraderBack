@@ -184,4 +184,169 @@ class BetFairController extends Controller
             return $this->getByDate($today, $data['token']);
         }
 
+        public function liveOdds(Request $request){
+            $data = $request->all();
+
+
+            $filter = array(
+                "filter" => array(
+                    "eventTypeIds"=>[1],
+                    "inPlayOnly"=>true
+                    )
+                );
+            try {
+                Betfair::auth()->persist('BOW5JF3VnYo4rqkt', $data['token']);
+                $res = Betfair::betting('listEvents', $filter);
+                usort($res , function ($a, $b){
+                    if(strtotime($a->event->openDate) > strtotime($b->event->openDate)){
+                        return 1;
+                    }
+                    if(strtotime($a->event->openDate) < strtotime($b->event->openDate)){
+                        return -1;
+                    }
+                    else {
+                        return 0;
+                    }
+                });
+                $gameIds = [];
+                foreach($res as $key => $game){
+                    $res2 = Curl::to('https://ips.betfair.com/inplayservice/v1/eventTimelines?_ak=nzIFcwyWhrlwYMrh&alt=json&eventIds='.$game->event->id.'&locale=pt')->get();
+                    $res[$key]->info = json_decode($res2);
+                    array_push($gameIds, $game->event->id);
+                }
+                $filter2 = [
+                    "filter"=>[
+                        "marketTypeCodes"=>["BOTH_TEAMS_TO_SCORE", "FIRST_HALF_GOALS_05","FIRST_HALF_GOALS_15","FIRST_HALF_GOALS_25","OVER_UNDER_05","OVER_UNDER_15","OVER_UNDER_25","OVER_UNDER_35","MATCH_ODDS"],
+                        "eventTypeIds"=>[1],
+                        "locale"=>"Portuguese",
+                        "eventIds"=>$gameIds,
+                    ],
+                    "maxResults"=>1000,
+                    "marketProjection"=>["EVENT"]
+                ];
+                $res2 = Betfair::betting('listMarketCatalogue', $filter2);
+                $contador = 0;
+                $tempMarkets = [];
+                foreach($res2 as $key => $market){
+                    array_push($tempMarkets, $market->marketId);
+                    if(count($tempMarkets) == 4){
+                        $filter3 = [
+                            "marketIds"=>$tempMarkets,
+                            "priceProjection"=>[
+                                "priceData"=>["EX_BEST_OFFERS"]
+                            ]
+                        ];
+                        $odd = Betfair::betting('listMarketBook', $filter3);
+                        foreach( $odd as $tempOdd){
+                            foreach( $res2 as $keyRes => $tempMarket){
+                                if($tempOdd->marketId == $tempMarket->marketId){
+                                    $res2[$keyRes]->odds = $tempOdd;
+                                }
+                            }
+                        }
+                        $tempMarkets = [];
+                    }
+
+                }
+                foreach($res as $key => $event){
+                    $arr = [];
+                    foreach($res2 as $market){
+                        if($event->event->id == $market->event->id){
+                            array_push($arr, $market);
+                        }
+                    }
+                    $res[$key]->market = $arr;
+
+                    // $res[$key]->market = array_chunk($res2, 7)[$key];
+                }
+
+                return $res;
+            } catch (Exception $e){
+                return $e;
+            }
+        }
+
+        public function liveNextOdds(Request $request){
+            $data = $request->all();
+            $from = new DateTime('now + 2 hour');
+            $to = new DateTime('now');
+            // return $from;
+            // return date('Y-m-dTh:i:sZ', mktime(23,59,59));
+            $filter = array(
+                "filter" => array(
+                    "eventTypeIds"=>[1],
+                    "locale"=>"Portuguese",
+                    "marketStartTime"=>array(
+                        "from"=>$from->setTimeZone(new \DateTimeZone('America/Sao_Paulo'))->format("Y-m-d\TH:i:s").'Z',
+                        "to"=>$to->setTime(23, 45)->setTimeZone(new \DateTimeZone('America/Sao_Paulo'))->format("Y-m-d\TH:i:s").'Z'
+                        )
+                    ),
+                );
+
+            Betfair::auth()->persist('BOW5JF3VnYo4rqkt', $data['token']);
+            $res = Betfair::betting('listEvents', $filter);
+            usort($res , function ($a, $b){
+                    if(strtotime($a->event->openDate) > strtotime($b->event->openDate)){
+                        return 1;
+                    }
+                    if(strtotime($a->event->openDate) < strtotime($b->event->openDate)){
+                        return -1;
+                    }
+                    else {
+                        return 0;
+                    }
+                });
+                $gameIds = [];
+                foreach($res as $event){
+                    array_push($gameIds, $event->event->id);
+                }
+                $filter2 = [
+                    "filter"=>[
+                        "marketTypeCodes"=>["BOTH_TEAMS_TO_SCORE", "FIRST_HALF_GOALS_05","FIRST_HALF_GOALS_15","FIRST_HALF_GOALS_25","OVER_UNDER_05","OVER_UNDER_15","OVER_UNDER_25","OVER_UNDER_35","MATCH_ODDS"],
+                        "eventTypeIds"=>[1],
+                        "locale"=>"Portuguese",
+                        "eventIds"=>$gameIds,
+                    ],
+                    "maxResults"=>1000,
+                    "marketProjection"=>["EVENT"]
+                ];
+                $res2 = Betfair::betting('listMarketCatalogue', $filter2);
+                $contador = 0;
+                $tempMarkets = [];
+                foreach($res2 as $key => $market){
+                    array_push($tempMarkets, $market->marketId);
+                    if(count($tempMarkets) == 4){
+                        $filter3 = [
+                            "marketIds"=>$tempMarkets,
+                            "priceProjection"=>[
+                                "priceData"=>["EX_BEST_OFFERS"]
+                            ]
+                        ];
+                        $odd = Betfair::betting('listMarketBook', $filter3);
+                        foreach( $odd as $tempOdd){
+                            foreach( $res2 as $keyRes => $tempMarket){
+                                if($tempOdd->marketId == $tempMarket->marketId){
+                                    $res2[$keyRes]->odds = $tempOdd;
+                                }
+                            }
+                        }
+                        $tempMarkets = [];
+                    }
+
+                }
+                foreach($res as $key => $event){
+                    $arr = [];
+                    foreach($res2 as $market){
+                        if($event->event->id == $market->event->id){
+                            array_push($arr, $market);
+                        }
+                    }
+                    $res[$key]->market = $arr;
+
+                    // $res[$key]->market = array_chunk($res2, 7)[$key];
+                }
+
+                return $res;
+        }
+
 }

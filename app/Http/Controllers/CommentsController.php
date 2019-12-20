@@ -41,14 +41,16 @@ class CommentsController extends Controller
         $comment = Comment::create([
             'user_id' => Auth::user()->id,
             'user_name' => Auth::user()->name,
-            'lesson-id' => $data['lesson_id'],
+            'lesson_id' => $data['lesson_id'],
             'content' => $data['content'],
             'status' => 'pending'
         ]);
         $comment->user()->associate(Auth::user());
         $comment->lesson()->associate(Lesson::find($data['lesson_id']));
 //        $comment->user()->associate(Auth::user());
-        return $comment;
+        $lesson = Lesson::findOrFail($data['lesson_id']);
+        $lesson->comments;
+        return $lesson;
     }
 
     /**

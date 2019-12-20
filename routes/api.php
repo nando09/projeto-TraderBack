@@ -33,6 +33,8 @@ Route::middleware('auth:api')->group(function(){
         Route::post('/liveEvents', 'BetFairController@getLiveEvents');
         Route::post('/nextEvents', 'BetFairController@getNextGames');
 
+        Route::post('/liveOdds', 'BetFairController@liveOdds');
+        Route::post('/liveNextOdds', 'BetFairController@liveNextOdds');
         Route::post('/todayOdds', 'BetFairController@todayOdds');
         Route::post('/tmOdds', 'BetFairController@tomorrowOdds');
         Route::post('/nextOdds', 'BetFairController@nextOdds');
@@ -49,19 +51,24 @@ Route::middleware('auth:api')->group(function(){
 
 //Rotas de organização de curso
     Route::prefix('/course')->group(function(){
+        Route::get('/activated', 'CoursesController@clientCourse');
+        Route::post('/activate', 'CoursesController@activateCourse');
         Route::post('/create', 'CoursesController@createCourse');
         Route::put('/update/{id}', 'CoursesController@updateCourse');
         Route::post('/destroy', 'CoursesController@destroyCourse');
     });
 
     Route::prefix('/module')->group(function(){
+        Route::get('/{id}', 'CoursesController@getModule');
         Route::post('/create', 'CoursesController@createModule');
         Route::put('/update/{id}', 'CoursesController@updateModule');
         Route::post('/destroy', 'CoursesController@destroyModule');
 
     });
 
+    Route::get('/lesson/{id}', 'CoursesController@getLesson');
     Route::prefix('/lesson')->group(function(){
+        Route::post('/comment', 'CommentsController@store');
         Route::post('/create', 'CoursesController@createLesson');
         Route::put('/update/{id}', 'CoursesController@updateLesson');
         Route::post('/destroy', 'CoursesController@destroyLesson');

@@ -20,8 +20,8 @@ class CreateCoursesTable extends Migration
             $table->string('AccessLevel');
             $table->date('DataInicio');
             $table->date('DataFim');
-            $table->string('status');
             $table->text('descricao');
+            $table->boolean('ativo');
             $table->timestamps();
         });
     }
