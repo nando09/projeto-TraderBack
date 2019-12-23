@@ -32,6 +32,7 @@ class BetFairController extends Controller
 
         $filter = array(
             "filter" => array(
+                "competitionIds" => ["12205499", "81", "99", "55", "10932509", "9404054", "194215", "12204313", "35", "12010356", "12117172", "12204313"],
                 "eventTypeIds"=>[1],
                 "inPlayOnly"=>true
                 )
@@ -62,6 +63,7 @@ class BetFairController extends Controller
         // return date('Y-m-dTh:i:sZ', mktime(23,59,59));
         $filter = array(
             "filter" => array(
+                "competitionIds" => ["12205499", "81", "99", "55", "10932509", "9404054", "194215", "12204313", "35", "12010356", "12117172", "12204313"],
                 "eventTypeIds"=>[1],
                 "locale"=>"Portuguese",
                 "marketStartTime"=>array(
@@ -87,6 +89,7 @@ class BetFairController extends Controller
 
                 $filter = array(
                     "filter" => array(
+                        "competitionIds" => ["12205499", "81", "99", "55", "10932509", "9404054", "194215", "12204313", "35", "12010356", "12117172", "12204313"],
                         "eventTypeIds"=>[1],
                         "locale"=>"Portuguese",
                         "marketStartTime"=>array(
@@ -190,6 +193,7 @@ class BetFairController extends Controller
 
             $filter = array(
                 "filter" => array(
+                    "competitionIds" => ["12205499", "81", "99", "55", "10932509", "9404054", "194215", "12204313", "35", "12010356", "12117172", "12204313"],
                     "eventTypeIds"=>[1],
                     "inPlayOnly"=>true
                     )
@@ -274,6 +278,7 @@ class BetFairController extends Controller
             // return date('Y-m-dTh:i:sZ', mktime(23,59,59));
             $filter = array(
                 "filter" => array(
+                    "competitionIds" => ["12205499", "81", "99", "55", "10932509", "9404054", "194215", "12204313", "35", "12010356", "12117172", "12204313"],
                     "eventTypeIds"=>[1],
                     "locale"=>"Portuguese",
                     "marketStartTime"=>array(

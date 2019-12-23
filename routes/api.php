@@ -28,6 +28,8 @@ Route::post('/client/register', 'RegisterController@RegisterClient')->name('clie
 
 Route::middleware('auth:api')->group(function(){
 
+    Route::post('/analise', 'AnaliseController@analise');
+
     Route::prefix('/betfair')->group(function() {
         Route::post('/login', 'BetFairController@login');
         Route::post('/liveEvents', 'BetFairController@getLiveEvents');
