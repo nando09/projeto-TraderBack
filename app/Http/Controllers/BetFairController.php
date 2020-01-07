@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Cache;
 use Ixudra\Curl\Facades\Curl;
 use PeterColes\Betfair\Betfair;
 use \DateTime;
+use Andonovn\LaravelBetsApi\BetsApi as BetsApi;
 
 class BetFairController extends Controller
 {
@@ -27,6 +28,7 @@ class BetFairController extends Controller
     public function eventsURL(){ return "https://api.betfair.com/exchange/betting/rest/v1.0/";}
 
     public function getLiveEvents(Request $request){
+
         $data = $request->all();
 
 
@@ -63,7 +65,7 @@ class BetFairController extends Controller
         // return date('Y-m-dTh:i:sZ', mktime(23,59,59));
         $filter = array(
             "filter" => array(
-                "competitionIds" => ["12205499", "81", "99", "55", "10932509", "9404054", "194215", "12204313", "35", "12010356", "12117172", "12204313"],
+                // "competitionIds" => ["12205499", "81", "99", "55", "10932509", "9404054", "194215", "12204313", "35", "12010356", "12117172", "12204313"],
                 "eventTypeIds"=>[1],
                 "locale"=>"Portuguese",
                 "marketStartTime"=>array(
@@ -89,7 +91,7 @@ class BetFairController extends Controller
 
                 $filter = array(
                     "filter" => array(
-                        "competitionIds" => ["12205499", "81", "99", "55", "10932509", "9404054", "194215", "12204313", "35", "12010356", "12117172", "12204313"],
+                        // "competitionIds" => ["12205499", "81", "99", "55", "10932509", "9404054", "194215", "12204313", "35", "12010356", "12117172", "12204313"],
                         "eventTypeIds"=>[1],
                         "locale"=>"Portuguese",
                         "marketStartTime"=>array(
@@ -97,71 +99,11 @@ class BetFairController extends Controller
                             "to"=>$date->setTime(23, 45)->setTimeZone(new \DateTimeZone('GMT'))->format("Y-m-d\TH:i:s").'Z',
                         )
                     ),
-                    "maxResults"=>20
                     // "marketProjection"=>[ "EVENT"]
                 );
                 Betfair::auth()->persist('BOW5JF3VnYo4rqkt', $token);
                 $res = Betfair::betting('listEvents', $filter);
-                usort($res , function ($a, $b){
-                    if(strtotime($a->event->openDate) > strtotime($b->event->openDate)){
-                        return 1;
-                    }
-                    if(strtotime($a->event->openDate) < strtotime($b->event->openDate)){
-                        return -1;
-                    }
-                    else {
-                        return 0;
-                    }
-                });
-                $gameIds = [];
-                foreach($res as $event){
-                    array_push($gameIds, $event->event->id);
-                }
-                $filter2 = [
-                    "filter"=>[
-                        "marketTypeCodes"=>["BOTH_TEAMS_TO_SCORE", "FIRST_HALF_GOALS_05","FIRST_HALF_GOALS_15","FIRST_HALF_GOALS_25","OVER_UNDER_05","OVER_UNDER_15","OVER_UNDER_25","OVER_UNDER_35","MATCH_ODDS"],
-                        "eventTypeIds"=>[1],
-                        "locale"=>"Portuguese",
-                        "eventIds"=>$gameIds,
-                    ],
-                    "maxResults"=>1000,
-                    "marketProjection"=>["EVENT"]
-                ];
-                $res2 = Betfair::betting('listMarketCatalogue', $filter2);
-                $contador = 0;
-                $tempMarkets = [];
-                foreach($res2 as $key => $market){
-                    array_push($tempMarkets, $market->marketId);
-                    if(count($tempMarkets) == 4){
-                        $filter3 = [
-                            "marketIds"=>$tempMarkets,
-                            "priceProjection"=>[
-                                "priceData"=>["EX_BEST_OFFERS"]
-                            ]
-                        ];
-                        $odd = Betfair::betting('listMarketBook', $filter3);
-                        foreach( $odd as $tempOdd){
-                            foreach( $res2 as $keyRes => $tempMarket){
-                                if($tempOdd->marketId == $tempMarket->marketId){
-                                    $res2[$keyRes]->odds = $tempOdd;
-                                }
-                            }
-                        }
-                        $tempMarkets = [];
-                    }
 
-                }
-                foreach($res as $key => $event){
-                    $arr = [];
-                    foreach($res2 as $market){
-                        if($event->event->id == $market->event->id){
-                            array_push($arr, $market);
-                        }
-                    }
-                    $res[$key]->market = $arr;
-
-                    // $res[$key]->market = array_chunk($res2, 7)[$key];
-                }
 
                 return $res;
             } catch(Exception $e) {
@@ -193,7 +135,7 @@ class BetFairController extends Controller
 
             $filter = array(
                 "filter" => array(
-                    "competitionIds" => ["12205499", "81", "99", "55", "10932509", "9404054", "194215", "12204313", "35", "12010356", "12117172", "12204313"],
+                    // "competitionIds" => ["12205499", "81", "99", "55", "10932509", "9404054", "194215", "12204313", "35", "12010356", "12117172", "12204313"],
                     "eventTypeIds"=>[1],
                     "inPlayOnly"=>true
                     )
@@ -201,68 +143,12 @@ class BetFairController extends Controller
             try {
                 Betfair::auth()->persist('BOW5JF3VnYo4rqkt', $data['token']);
                 $res = Betfair::betting('listEvents', $filter);
-                usort($res , function ($a, $b){
-                    if(strtotime($a->event->openDate) > strtotime($b->event->openDate)){
-                        return 1;
-                    }
-                    if(strtotime($a->event->openDate) < strtotime($b->event->openDate)){
-                        return -1;
-                    }
-                    else {
-                        return 0;
-                    }
-                });
-                $gameIds = [];
+
                 foreach($res as $key => $game){
                     $res2 = Curl::to('https://ips.betfair.com/inplayservice/v1/eventTimelines?_ak=nzIFcwyWhrlwYMrh&alt=json&eventIds='.$game->event->id.'&locale=pt')->get();
                     $res[$key]->info = json_decode($res2);
-                    array_push($gameIds, $game->event->id);
                 }
-                $filter2 = [
-                    "filter"=>[
-                        "marketTypeCodes"=>["BOTH_TEAMS_TO_SCORE", "FIRST_HALF_GOALS_05","FIRST_HALF_GOALS_15","FIRST_HALF_GOALS_25","OVER_UNDER_05","OVER_UNDER_15","OVER_UNDER_25","OVER_UNDER_35","MATCH_ODDS"],
-                        "eventTypeIds"=>[1],
-                        "locale"=>"Portuguese",
-                        "eventIds"=>$gameIds,
-                    ],
-                    "maxResults"=>1000,
-                    "marketProjection"=>["EVENT"]
-                ];
-                $res2 = Betfair::betting('listMarketCatalogue', $filter2);
-                $contador = 0;
-                $tempMarkets = [];
-                foreach($res2 as $key => $market){
-                    array_push($tempMarkets, $market->marketId);
-                    if(count($tempMarkets) == 4){
-                        $filter3 = [
-                            "marketIds"=>$tempMarkets,
-                            "priceProjection"=>[
-                                "priceData"=>["EX_BEST_OFFERS"]
-                            ]
-                        ];
-                        $odd = Betfair::betting('listMarketBook', $filter3);
-                        foreach( $odd as $tempOdd){
-                            foreach( $res2 as $keyRes => $tempMarket){
-                                if($tempOdd->marketId == $tempMarket->marketId){
-                                    $res2[$keyRes]->odds = $tempOdd;
-                                }
-                            }
-                        }
-                        $tempMarkets = [];
-                    }
 
-                }
-                foreach($res as $key => $event){
-                    $arr = [];
-                    foreach($res2 as $market){
-                        if($event->event->id == $market->event->id){
-                            array_push($arr, $market);
-                        }
-                    }
-                    $res[$key]->market = $arr;
-
-                    // $res[$key]->market = array_chunk($res2, 7)[$key];
-                }
 
                 return $res;
             } catch (Exception $e){
@@ -353,5 +239,6 @@ class BetFairController extends Controller
 
                 return $res;
         }
+
 
 }
