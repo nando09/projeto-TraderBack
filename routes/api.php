@@ -26,6 +26,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::post('/login', "LoginController@login")->name('login');
 Route::post('/client/register', 'RegisterController@RegisterClient')->name('clientRegister');
 
+Route::get('/estatistica', 'TeamSeasonController@estatistica');
+
 Route::middleware('auth:api')->group(function(){
 
     Route::post('/analise', 'AnaliseController@analise');
