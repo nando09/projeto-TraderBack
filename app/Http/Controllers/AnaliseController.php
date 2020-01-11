@@ -42,24 +42,48 @@ class AnaliseController extends Controller
 
 	// public function teste(){
 	public function teste(){
-        $array = [];
-        $data = 'uJFjXIQnft4+KO8+edqJ/on2qhCpcGn1fnlvip850RM=';
-        $tomorrow = new \DateTime('tomorrow', new \DateTimeZone('America/Sao_Paulo'));
-        $event = $this->getByDate($tomorrow, $data);
+			// $data = $request->all();
+			// $tomorrow = new \DateTime('tomorrow', new \DateTimeZone('America/Sao_Paulo'));
+			// return $this->getByDate($tomorrow, $data['token']);
 
-        foreach ($event as $key => $value) {
-            $data = [];
-            // $data['id']             =   $value->event->id;
-            $data['name']           =   $value->event->name;
-            $data['created_at']     =   NOW();
-            $data['updated_at']     =   NOW();
-            array_push($array, $data);
+			// $data = $request->all();
+			// $day = new \DateTime('today + 2 days', new \DateTimeZone('America/Sao_Paulo'));
+			// return $this->getByDate($day, $data['token']);
 
-            break;
-        }
+			// $data = $request->all();
+			// $today = new \DateTime('today', new \DateTimeZone('America/Sao_Paulo'));
+			// return $this->getByDate($today, $data['token']);
 
-        DB::table('save_analyses')->insert($array);
-        return $array;
+		$array = array();
+		$data = 'uJFjXIQnft4+KO8+edqJ/on2qhCpcGn1fnlvip850RM=';
+
+		$today = new \DateTime('today', new \DateTimeZone('America/Sao_Paulo'));
+		$event = $this->getByDate($today, $data);
+		array_push($array, $event);
+
+		$tomorrow = new \DateTime('tomorrow', new \DateTimeZone('America/Sao_Paulo'));
+		$event = $this->getByDate($tomorrow, $data);
+		array_push($array, $event);
+
+		$day = new \DateTime('today + 2 days', new \DateTimeZone('America/Sao_Paulo'));
+		$event = $this->getByDate($day, $data);
+		array_push($array, $event);
+
+		return $array;
+
+		foreach ($event as $key => $value) {
+			$data = [];
+			// $data['id']             =   $value->event->id;
+			$data['name']           =   $value->event->name;
+			$data['created_at']     =   NOW();
+			$data['updated_at']     =   NOW();
+			array_push($array, $data);
+
+			// break;
+		}
+
+		// DB::table('save_analyses')->insert($array);
+		return $array;
 
 		// $data = 'uJFjXIQnft4+KO8+edqJ/on2qhCpcGn1fnlvip850RM=';
 		// $tomorrow = new \DateTime('tomorrow', new \DateTimeZone('America/Sao_Paulo'));
